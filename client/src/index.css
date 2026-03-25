@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand text-white font-medium px-5 py-2.5 rounded-btn text-sm
+           hover:bg-blue-700 transition-colors duration-150 cursor-pointer
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-alt border border-border font-medium px-5 py-2.5
+           rounded-btn text-sm text-ink hover:bg-gray-100 transition-colors
+           duration-150 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply text-ink-muted font-medium px-4 py-2 rounded-btn text-sm
+           hover:bg-surface-alt transition-colors duration-150 cursor-pointer;
+  }
+
+  .card {
+    @apply bg-surface-card border border-border rounded-card p-5 shadow-card
+           hover:shadow-card-lg hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-border rounded-input text-sm
+           focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none
+           transition-all duration-150 bg-white;
+  }
+
+  .tag-blue {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs
+           font-medium bg-brand-soft text-brand;
+  }
+
+  .tag-green {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs
+           font-medium bg-earn-soft text-earn;
+  }
+
+  .tag-amber {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs
+           font-medium bg-warn-soft text-warn;
+  }
+
+  .tag-red {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs
+           font-medium bg-danger-soft text-danger;
+  }
+}
