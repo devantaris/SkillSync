@@ -1,22 +1,16 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BarChart2, BookOpen, Wallet,
-  Map, Upload, User, LogOut,
+  Map, Upload, LogOut, Plus,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import CreditBadge from './CreditBadge';
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'My Skills', icon: BarChart2, path: '/skills' },
-  { label: 'Courses', icon: BookOpen, path: '/courses' },
-  { label: 'Wallet', icon: Wallet, path: '/wallet' },
-  { label: 'Roadmaps', icon: Map, path: '/roadmaps' },
-  { label: 'Upload', icon: Upload, path: '/upload' },
-];
-
-const bottomItems = [
-  { label: 'Profile', icon: User, path: '/dashboard' },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/app/dashboard' },
+  { label: 'Courses', icon: BookOpen, path: '/app/courses' },
+  { label: 'My Skills', icon: BarChart2, path: '/app/skills' },
+  { label: 'Wallet', icon: Wallet, path: '/app/wallet' },
+  { label: 'Roadmaps', icon: Map, path: '/app/roadmaps' },
 ];
 
 export default function Sidebar() {
@@ -27,12 +21,6 @@ export default function Sidebar() {
     await logout();
     navigate('/');
   };
-
-  const linkClasses = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2.5 rounded-btn text-sm font-medium transition-colors duration-150
-     ${isActive
-      ? 'bg-brand-soft text-brand'
-      : 'text-ink-muted hover:bg-surface-alt hover:text-ink'}`;
 
   return (
     <>
@@ -51,23 +39,40 @@ export default function Sidebar() {
 
         <div className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
-            <NavLink key={item.path} to={item.path} className={linkClasses}>
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative
+                 ${isActive
+                  ? 'bg-brand-soft text-brand before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-5 before:bg-brand before:rounded-r-full'
+                  : 'text-ink-muted hover:bg-surface-alt hover:text-ink'}`
+              }
+            >
               <item.icon size={18} />
               <span className="md:hidden lg:inline">{item.label}</span>
             </NavLink>
           ))}
+
+          {/* Upload button */}
+          <NavLink
+            to="/app/upload"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 mt-2
+               ${isActive
+                ? 'bg-brand text-white'
+                : 'bg-brand-soft text-brand hover:bg-brand hover:text-white'}`
+            }
+          >
+            <Plus size={18} />
+            <span className="md:hidden lg:inline">Upload Course</span>
+          </NavLink>
         </div>
 
-        <div className="px-3 py-4 border-t border-border space-y-1">
-          {bottomItems.map((item) => (
-            <NavLink key={item.label} to={item.path} className={linkClasses}>
-              <item.icon size={18} />
-              <span className="md:hidden lg:inline">{item.label}</span>
-            </NavLink>
-          ))}
+        <div className="px-3 py-3 border-t border-border">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-btn text-sm font-medium
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                        text-ink-muted hover:bg-danger-soft hover:text-danger transition-colors duration-150 w-full"
           >
             <LogOut size={18} />
@@ -77,10 +82,10 @@ export default function Sidebar() {
 
         <div className="px-4 py-3 border-t border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-brand-soft flex items-center justify-center text-brand text-sm font-semibold">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-sm font-semibold shrink-0">
               {profile?.name?.[0]?.toUpperCase() || 'U'}
             </div>
-            <div className="md:hidden lg:block">
+            <div className="md:hidden lg:block min-w-0">
               <p className="text-sm font-medium text-ink truncate">{profile?.name || 'User'}</p>
               <p className="text-xs text-ink-muted truncate">{profile?.email || ''}</p>
             </div>
@@ -89,14 +94,14 @@ export default function Sidebar() {
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 px-2 py-1">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-border z-50 px-2 py-1 safe-bottom">
         <div className="flex items-center justify-around">
-          {navItems.slice(0, 5).map((item) => (
+          {navItems.slice(0, 4).map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex flex-col items-center py-2 px-3 text-xs min-w-[44px] min-h-[44px] justify-center
+                `flex flex-col items-center py-2 px-3 text-xs min-w-[56px] rounded-lg transition-colors
                  ${isActive ? 'text-brand' : 'text-ink-muted'}`
               }
             >
@@ -104,6 +109,14 @@ export default function Sidebar() {
               <span className="mt-0.5">{item.label}</span>
             </NavLink>
           ))}
+          <NavLink
+            to="/app/upload"
+            className="flex flex-col items-center py-2 px-3"
+          >
+            <div className="w-9 h-9 bg-brand rounded-full flex items-center justify-center -mt-4 shadow-lg">
+              <Plus size={18} className="text-white" />
+            </div>
+          </NavLink>
         </div>
       </nav>
     </>

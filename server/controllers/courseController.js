@@ -7,7 +7,7 @@ export async function listCourses(req, res) {
 
     let query = supabaseAdmin
       .from('courses')
-      .select('*, profiles!courses_creator_id_fkey(name, avatar_url)')
+      .select('*')
       .eq('status', 'approved');
 
     if (search) {
@@ -33,12 +33,20 @@ export async function listCourses(req, res) {
     const { data, error } = await query;
     if (error) throw error;
 
-    // Map creator info
+    // Batch-fetch creator profiles
+    const creatorIds = [...new Set(data.map(c => c.creator_id).filter(Boolean))];
+    const { data: profiles } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id, name, avatar_url')
+      .in('user_id', creatorIds);
+
+    const profileMap = {};
+    (profiles || []).forEach(p => { profileMap[p.user_id] = p; });
+
     const courses = data.map((c) => ({
       ...c,
-      creator: c.profiles?.name || 'Unknown',
-      creator_avatar: c.profiles?.avatar_url,
-      profiles: undefined,
+      creator: profileMap[c.creator_id]?.name || 'Unknown',
+      creator_avatar: profileMap[c.creator_id]?.avatar_url || null,
     }));
 
     res.json({ courses });
@@ -53,7 +61,7 @@ export async function getCourse(req, res) {
   try {
     const { data, error } = await supabaseAdmin
       .from('courses')
-      .select('*, profiles!courses_creator_id_fkey(name, avatar_url)')
+      .select('*')
       .eq('id', req.params.id)
       .single();
 
@@ -61,14 +69,22 @@ export async function getCourse(req, res) {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    const course = {
-      ...data,
-      creator: data.profiles?.name || 'Unknown',
-      creator_avatar: data.profiles?.avatar_url,
-      profiles: undefined,
-    };
+    // Fetch creator profile
+    let creator = 'Unknown';
+    let creatorAvatar = null;
+    if (data.creator_id) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('name, avatar_url')
+        .eq('user_id', data.creator_id)
+        .single();
+      if (profile) {
+        creator = profile.name;
+        creatorAvatar = profile.avatar_url;
+      }
+    }
 
-    res.json({ course });
+    res.json({ course: { ...data, creator, creator_avatar: creatorAvatar } });
   } catch (error) {
     console.error('Get course error:', error);
     res.status(500).json({ error: 'Failed to fetch course' });

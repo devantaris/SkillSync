@@ -1,5 +1,6 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/shared/ProtectedRoute';
+import DashboardLayout from './components/shared/DashboardLayout';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -18,50 +19,34 @@ const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
+
+  // Authenticated app routes with shared layout
+  {
+    path: '/app',
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/app/dashboard" replace /> },
+      { path: 'dashboard', element: <Dashboard /> },
+      { path: 'courses', element: <Courses /> },
+      { path: 'courses/:id', element: <CourseDetail /> },
+      { path: 'skills', element: <Skills /> },
+      { path: 'wallet', element: <Wallet /> },
+      { path: 'upload', element: <UploadCourse /> },
+      { path: 'roadmaps', element: <Roadmaps /> },
+    ],
+  },
+
+  // Legacy redirects
+  { path: '/dashboard', element: <Navigate to="/app/dashboard" replace /> },
   { path: '/courses', element: <Courses /> },
   { path: '/courses/:id', element: <CourseDetail /> },
-
-  // Protected routes
-  {
-    path: '/dashboard',
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/skills',
-    element: (
-      <ProtectedRoute>
-        <Skills />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/wallet',
-    element: (
-      <ProtectedRoute>
-        <Wallet />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/upload',
-    element: (
-      <ProtectedRoute>
-        <UploadCourse />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/roadmaps',
-    element: (
-      <ProtectedRoute>
-        <Roadmaps />
-      </ProtectedRoute>
-    ),
-  },
+  { path: '/skills', element: <Navigate to="/app/skills" replace /> },
+  { path: '/wallet', element: <Navigate to="/app/wallet" replace /> },
+  { path: '/upload', element: <Navigate to="/app/upload" replace /> },
 
   // 404
   { path: '*', element: <NotFound /> },

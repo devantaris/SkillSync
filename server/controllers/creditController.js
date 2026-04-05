@@ -7,10 +7,21 @@ export async function getBalance(req, res) {
       .from('credits')
       .select('balance')
       .eq('user_id', req.user.id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
-    res.json({ balance: data?.balance || 0 });
+
+    // If no row found, create one with 0 balance
+    if (!data) {
+      const { data: newRow } = await supabaseAdmin
+        .from('credits')
+        .insert({ user_id: req.user.id, balance: 0 })
+        .select()
+        .single();
+      return res.json({ balance: newRow?.balance || 0 });
+    }
+
+    res.json({ balance: data.balance });
   } catch (error) {
     console.error('Get balance error:', error);
     res.status(500).json({ error: 'Failed to fetch balance' });
@@ -30,7 +41,7 @@ export async function getTransactions(req, res) {
       .range(Number(offset), Number(offset) + Number(limit) - 1);
 
     if (error) throw error;
-    res.json({ transactions: data, total: count });
+    res.json({ transactions: data || [], total: count || 0 });
   } catch (error) {
     console.error('Get transactions error:', error);
     res.status(500).json({ error: 'Failed to fetch transactions' });

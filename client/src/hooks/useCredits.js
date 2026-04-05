@@ -1,14 +1,14 @@
 import { useCreditStore } from '../store/creditStore';
 
-export const useCredits = () => {
-  const { balance, transactions, loading, setBalance, deductCredits, earnCredits } = useCreditStore();
-
+export function useCredits() {
+  const store = useCreditStore();
   return {
-    balance,
-    transactions,
-    loading,
-    setBalance,
-    deductCredits,
-    earnCredits,
+    balance: store.balance,
+    transactions: store.transactions,
+    loading: store.loading,
+    deductCredits: store.deductCredits,
+    earnCredits: store.earnCredits,
+    fetchBalance: store.fetchBalance,
+    fetchTransactions: store.fetchTransactions,
   };
-};
+}
