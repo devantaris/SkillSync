@@ -3,13 +3,33 @@ import { supabaseAdmin } from '../config/supabase.js';
 // GET /api/auth/profile
 export async function getProfile(req, res) {
   try {
-    const { data, error } = await supabaseAdmin
+    let { data, error } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('user_id', req.user.id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+
+    // Auto-create profile for new users (e.g., Google OAuth)
+    if (!data) {
+      const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(req.user.id);
+      const name = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+
+      const { data: newProfile, error: insertErr } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          user_id: req.user.id,
+          name,
+          email: user?.email || '',
+          avatar_url: user?.user_metadata?.avatar_url || null,
+        })
+        .select()
+        .single();
+
+      if (insertErr) throw insertErr;
+      data = newProfile;
+    }
 
     res.json({ profile: data });
   } catch (error) {

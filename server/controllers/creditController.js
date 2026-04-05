@@ -1,5 +1,7 @@
 import { supabaseAdmin } from '../config/supabase.js';
 
+const STARTER_CREDITS = 100;
+
 // GET /api/credits/balance
 export async function getBalance(req, res) {
   try {
@@ -11,14 +13,23 @@ export async function getBalance(req, res) {
 
     if (error) throw error;
 
-    // If no row found, create one with 0 balance
+    // New user — create credits row with 100 starter credits
     if (!data) {
       const { data: newRow } = await supabaseAdmin
         .from('credits')
-        .insert({ user_id: req.user.id, balance: 0 })
+        .insert({ user_id: req.user.id, balance: STARTER_CREDITS })
         .select()
         .single();
-      return res.json({ balance: newRow?.balance || 0 });
+
+      // Log the welcome bonus transaction
+      await supabaseAdmin.from('transactions').insert({
+        user_id: req.user.id,
+        type: 'earn',
+        amount: STARTER_CREDITS,
+        description: 'Welcome bonus — 100 starter credits',
+      });
+
+      return res.json({ balance: newRow?.balance || STARTER_CREDITS });
     }
 
     res.json({ balance: data.balance });
